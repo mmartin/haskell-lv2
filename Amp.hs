@@ -11,6 +11,8 @@ import Foreign.Marshal.Array
 
 import Control.Monad
 
+import Data.IORef
+
 type Port = Ptr CFloat
 type Ports = Ptr Port
 
@@ -20,7 +22,7 @@ data HandleData a = HandleData { ports      :: Ports
 
 type Handle a = StablePtr (HandleData a)
 
-type AmpPlugin = Handle ()
+type AmpPlugin = Handle (IORef [CFloat])
 
 get_port :: Ports -> Int -> IO Port
 get_port = peekElemOff
@@ -34,13 +36,14 @@ write_port = pokeElemOff
 get_read_port :: Ports -> Int -> Int -> IO CFloat
 get_read_port ps pi si = get_port ps pi >>= \p -> read_port p si
 
-instantiate_hs :: Ptr () -> CDouble -> CString -> Ptr () -> IO AmpPlugin
-instantiate_hs _ _ _ _ = do
+instantiate :: Ptr () -> CDouble -> CString -> Ptr () -> IO AmpPlugin
+instantiate _ _ _ _ = do
     p <- mallocArray 3
-    newStablePtr HandleData { ports = p, userData = () }
+    ref <- newIORef $ take (2 * 1024) $ repeat 0
+    newStablePtr HandleData { ports = p, userData = ref }
 
-cleanup_hs :: AmpPlugin -> IO ()
-cleanup_hs h = freeStablePtr h
+cleanup :: AmpPlugin -> IO ()
+cleanup h = freeStablePtr h
 
 activate :: AmpPlugin -> IO ()
 activate _ = return ()
@@ -55,26 +58,34 @@ connect_port h i d = do
 
 run :: AmpPlugin -> CUInt -> IO ()
 run h s = do
-    p <- liftM ports $ deRefStablePtr h
+    h' <- deRefStablePtr h
+    let p = ports h'
+        d = userData h'
+
     gain <- get_read_port p 0 0
     i <- get_port p 1
     o <- get_port p 2
 
     let s' = fromIntegral s
-        fuu :: CFloat -> CFloat
         fuu a = a * (10 ** (gain * 0.05))
 
-    let proc :: Int -> IO ()
-        proc n | n < s' = liftM fuu (read_port i n) >>= write_port o n >> proc (n+1)
-               | otherwise = return ()
+    hist <- liftM (map (*0.3) . take s') (readIORef d)
+    samples <- liftM (zipWith (+) hist) (peekArray s' i)
+    pokeArray o $ map fuu samples
 
-    proc 0
+    modifyIORef d ((++samples) . drop s')
 
-foreign export ccall instantiate_hs :: Ptr () -> CDouble -> CString -> Ptr () -> IO AmpPlugin
-foreign export ccall cleanup_hs :: AmpPlugin -> IO ()
+
+extension_data :: CString -> Ptr ()
+extension_data _ = nullPtr
+
+foreign export ccall instantiate :: Ptr () -> CDouble -> CString -> Ptr () -> IO AmpPlugin
+foreign export ccall cleanup :: AmpPlugin -> IO ()
 
 foreign export ccall activate :: AmpPlugin -> IO ()
 foreign export ccall deactivate :: AmpPlugin -> IO ()
 
 foreign export ccall connect_port :: AmpPlugin -> Int -> Ptr CFloat -> IO ()
 foreign export ccall run :: AmpPlugin -> CUInt -> IO ()
+
+foreign export ccall extension_data :: CString -> Ptr ()

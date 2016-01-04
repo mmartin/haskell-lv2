@@ -1,49 +1,18 @@
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
 #include "Amp_stub.h"
 
-#define AMP_URI "http://github.com/mmartin/amp"
-
-static LV2_Handle
-instantiate(const LV2_Descriptor*     descriptor,
-            double                    rate,
-            const char*               bundle_path,
-            const LV2_Feature* const* features)
-{
-    static char* argv[] = { "amp.so", NULL }, **argv_ = argv;
-    static int argc = 1;
-    hs_init(&argc, &argv_);
-    return (LV2_Handle)instantiate_hs((void*)descriptor,
-                                      rate,
-                                      (void*)bundle_path,
-                                      (void*)features);
-}
-
-static void
-cleanup(LV2_Handle instance)
-{
-    cleanup_hs(instance);
-    hs_exit();
-}
-
-static const void*
-extension_data(const char* uri)
-{
-    return NULL;
-}
-
 static const LV2_Descriptor descriptor = {
-    AMP_URI,
-    instantiate,
-    connect_port,
-    activate,
-    run,
-    deactivate,
-    cleanup,
-    extension_data
+    (const char*)"http://github.com/mmartin/amp",
+    (LV2_Handle(*)(const struct _LV2_Descriptor*, double, const char*, const LV2_Feature *const*)) instantiate,
+    (void(*)(LV2_Handle, uint32_t, void*)) connect_port,
+    (void(*)(LV2_Handle)) activate,
+    (void(*)(LV2_Handle, uint32_t)) run,
+    (void(*)(LV2_Handle)) deactivate,
+    (void(*)(LV2_Handle)) cleanup,
+    (const void*(*)(const char*)) extension_data
 };
 
 LV2_SYMBOL_EXPORT
