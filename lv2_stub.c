@@ -3,6 +3,8 @@
 
 #include "LV2_stub.h"
 
+extern HsStablePtr lv2descriptors(HsWord32);
+
 LV2_SYMBOL_EXPORT
 const LV2_Descriptor*
 lv2_descriptor(uint32_t index)

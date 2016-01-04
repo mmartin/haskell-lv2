@@ -1,0 +1,74 @@
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+
+<http://github.com/mmartin/amp#Mono>
+    a lv2:Plugin , lv2:AmplifierPlugin ;
+
+    doap:name "Amplifier Mono" ;
+
+    lv2:port [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 0 ;
+        lv2:symbol "gain" ;
+        lv2:name "Gain" ;
+        lv2:default 0.0 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 50.0 ;
+        units:unit units:db ;
+    ] , [
+        a lv2:AudioPort , lv2:InputPort ;
+        lv2:index 1 ;
+        lv2:symbol "in" ;
+        lv2:name "In"
+    ] , [
+        a lv2:AudioPort , lv2:OutputPort ;
+        lv2:index 2 ;
+        lv2:symbol "out" ;
+        lv2:name "Out"
+    ] .
+
+<http://github.com/mmartin/amp#Stereo>
+    a lv2:Plugin , lv2:AmplifierPlugin ;
+
+    doap:name "Amplifier Stereo" ;
+
+    lv2:port [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 0 ;
+        lv2:symbol "gainl" ;
+        lv2:name "Gain left" ;
+        lv2:default 0.0 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 50.0 ;
+        units:unit units:db ;
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 1 ;
+        lv2:symbol "gainr" ;
+        lv2:name "Gain right" ;
+        lv2:default 0.0 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 50.0 ;
+        units:unit units:db ;
+    ] , [
+        a lv2:AudioPort , lv2:InputPort ;
+        lv2:index 2 ;
+        lv2:symbol "inl" ;
+        lv2:name "In left"
+    ] , [
+        a lv2:AudioPort , lv2:OutputPort ;
+        lv2:index 3 ;
+        lv2:symbol "outl" ;
+        lv2:name "Out left"
+    ] , [
+        a lv2:AudioPort , lv2:InputPort ;
+        lv2:index 4 ;
+        lv2:symbol "inr" ;
+        lv2:name "In right"
+    ] , [
+        a lv2:AudioPort , lv2:OutputPort ;
+        lv2:index 5 ;
+        lv2:symbol "outr" ;
+        lv2:name "Out right"
+    ] .
