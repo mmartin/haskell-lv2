@@ -1,10 +1,9 @@
-name:               haskell-lv2
+name:               amp-lv2
 version:            0.0.0.1
-synopsis:           Haskell bindings for LV2 plugin API
-description:        Haskell bindings for LV2 plugin API
+synopsis:           Simple aplifier plugin for LV2
+description:        Simple aplifier plugin for LV2
 homepage:           https://github.com/mmartin/haskell-lv2
 license:            BSD3
-license-file:       LICENSE
 author:             Mārtiņš Mačs
 maintainer:         macs.martins@gmail.com
 category:           Music
@@ -12,10 +11,10 @@ build-type:         Simple
 cabal-version:      >=1.10
 
 library
-    exposed-modules:    LV2
-    c-sources:          lv2_stub.c
+    exposed-modules:    Amp
     default-language:   Haskell2010
-    ghc-options:        -dynamic
+    ghc-options:        -o amp.so -shared -dynamic -fPIC -no-hs-main -lHSrts-ghc7.8.4
 
     build-depends:      base     ==4.*
                       , template-haskell
+                      , haskell-lv2
