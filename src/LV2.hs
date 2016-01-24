@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, ForeignFunctionInterface #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
 
 module LV2
     ( Desc(..)
@@ -7,7 +7,7 @@ module LV2
     , getPort
     , readPort
     , writePort
-    , buildDesc
+    , registerDesc
     )
     where
 
@@ -105,12 +105,12 @@ foreign export ccall descUri :: StablePtr (Desc a) -> IO CString
 foreign import ccall "wrapper" mkInst :: Inst a -> IO (FunPtr (Inst a))
 foreign export ccall descInst :: StablePtr (Desc a) -> IO (FunPtr (Inst a))
 
-buildDesc :: [Desc ()] -> (Int -> IO (StablePtr (Desc ())))
-buildDesc d = xx
-    where xx i | i < length d = newStablePtr (d !! (fromIntegral i))
-               | otherwise    = return $ castPtrToStablePtr nullPtr
+foreign import ccall "register_plugin" c_register_plugin :: StablePtr (Desc ()) -> IO ()
+
+registerDesc :: Desc () -> IO ()
+registerDesc d = newStablePtr d >>= c_register_plugin
 
 exportDesc :: Name -> Q [Dec]
 exportDesc name = do
-    t <- [t| Int -> IO (StablePtr (Desc ())) |]
-    return [ForeignD (ExportF CCall "lv2descriptors" name t)]
+    VarI _ t _ _ <- reify name -- TODO: force function type
+    return [ForeignD (ExportF CCall "hs_register_plugins" name t)]

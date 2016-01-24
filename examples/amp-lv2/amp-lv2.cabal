@@ -7,14 +7,14 @@ license:            BSD3
 author:             Mārtiņš Mačs
 maintainer:         macs.martins@gmail.com
 category:           Music
-build-type:         Simple
+build-type:         Custom
 cabal-version:      >=1.10
 
 library
     exposed-modules:    Amp
     default-language:   Haskell2010
-    ghc-options:        -o amp.so -shared -dynamic -fPIC -no-hs-main -lHSrts-ghc7.8.4
+    ghc-options:        -o amp.so
 
-    build-depends:      base     ==4.*
+    build-depends:      base==4.*
                       , template-haskell
                       , haskell-lv2
